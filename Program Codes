@@ -1,0 +1,305 @@
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+h1 {
+font-weight: 700;
+font-size: 2.4rem;
+margin-bottom: 20px;
+color: #222;
+text-align: center;
+}
+p {
+font-size: 1.1rem;
+line-height: 1.6;
+margin-bottom: 20px;
+color: #555;
+}
+.section {
+margin-bottom: 30px;
+}
+.skills {
+margin-top: 10px;
+}
+.skill {
+margin-bottom: 16px;
+}
+.skill-label {
+font-weight: 600;
+margin-bottom: 6px;
+color: #444;
+}
+.skill-bar {
+background: #e1e7f0;
+border-radius: 12px;
+overflow: hidden;
+height: 18px;
+box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+.skill-progress {
+height: 100%;
+width: 0;
+background: linear-gradient(90deg, #667eea, #764ba2);
+border-radius: 12px;
+transition: width 1.6s ease;
+}
+/* Responsive */
+@media (max-width: 600px) {
+.container {
+padding: 25px 20px;
+}
+h1 {
+font-size: 1.8rem;
+}
+p {
+font-size: 1rem;
+}
+}
+</style>
+</head>
+<body>
+<div class="container" role="main">
+<h1>About Us</h1>
+<div class="section">
+<p>Welcome to our platform! We’re passionate about creating seamless
+user experiences that empower people worldwide. Our mission is to provide
+simple, elegant solutions for your everyday digital needs.</p>
+<p>Founded in 2023, our team combines expertise in design, development,
+and innovation to build tools that you’ll love using every day.</p>
+</div>
+<div class="section">
+<h2 style="margin-bottom:12px; font-weight:600; color:#333;">Our
+Skills</h2>
+<div class="skills">
+<div class="skill">
+<div class="skill-label">User Experience Design</div>
+<div class="skill-bar"><div class="skill-progress" data-
+progress="90%"></div></div>
+</div>
+<div class="skill">
+<div class="skill-label">Web Development</div>
+<div class="skill-bar"><div class="skill-progress" data-
+progress="85%"></div></div>
+</div>
+<div class="skill">
+<div class="skill-label">Mobile App Development</div>
+itemController.js
+<div class="skill-bar"><div class="skill-progress" data-
+progress="75%"></div></div>
+</div>
+<div class="skill">
+<div class="skill-label">Customer Support</div>
+<div class="skill-bar"><div class="skill-progress" data-
+progress="95%"></div></div>
+</div>
+</div>
+</div>
+<div class="section">
+<p>Thank you for visiting us! We’re excited to have you along on this
+journey.</p>
+</div>
+</div>
+<script>
+// Animate skill bars on load
+window.addEventListener('DOMContentLoaded', () => {
+const skillProgressBars = document.querySelectorAll('.skill-progress');
+skillProgressBars.forEach(bar => {
+const progress = bar.getAttribute('data-progress');
+setTimeout(() => {
+bar.style.width = progress;
+}, 300);
+});
+});
+</script>
+</body>
+</html>
+const Item = require('../models/item');
+// Create a new item
+exports.createItem = async (req, res) => {
+try {
+const newItem = new Item(req.body);
+await newItem.save();
+res.status(201).json(newItem);
+} catch (error) {
+res.status(400).json({ message: error.message });
+}
+};
+// Get all items
+exports.getItems = async (req, res) => {
+try {
+const items = await Item.find();
+res.status(200).json(items);
+} catch (error) {
+res.status(500).json({ message: error.message });
+}
+};
+// Get a single item by ID
+exports.getItemById = async (req, res) => {
+try {
+const item = await Item.findById(req.params.id);
+if (!item) {
+return res.status(404).json({ message: 'Item not found' });
+}
+res.status(200).json(item);
+} catch (error) {
+res.status(500).json({ message: error.message });
+}
+};
+// Update an item by ID
+exports.updateItem = async (req, res) => {
+try {
+const updatedItem = await Item.findByIdAndUpdate(req.params.id,
+req.body, { new: true });
+if (!updatedItem) {
+return res.status(404).json({ message: 'Item not found' });
+}
+res.status(200).json(updatedItem);
+} catch (error) {
+res.status(400).json({ message: error.message });
+}
+};
+// Delete an item by ID
+exports.deleteItem = async (req, res) => {
+try {
+const deletedItem = await Item.findByIdAndDelete(req.params.id);
+if (!deletedItem) {
+return res.status(404).json({ message: 'Item not found' });
+}
+res.status(204).send();
+} catch (error) {
+res.status(500).json({ message: error.message });
+}
+};
+Item.js
+const mongoose = require('mongoose');
+const itemSchema = new mongoose.Schema({
+name: {
+type: String,
+required: true,
+trim: true
+},
+description: {
+type: String,
+trim: true
+},
+createdAt: {
+type: Date,
+default: Date.now
+}
+});
+const Item = mongoose.model('Item', itemSchema);
+module.exports = Item;
+const express = require('express');
+const router = express.Router();
+const itemsController = require('../controllers/itemsController');
+// Create a new item
+router.post('/', itemsController.createItem);
+// Get all items
+router.get('/', itemsController.getItems);
+// Get a single item by ID
+router.get('/:id', itemsController.getItemById);
+// Update an item by ID
+router.put('/:id', itemsController.updateItem);
+// Delete an item by ID
+router.delete('/:id', itemsController.deleteItem);
+index.js
+Item.test.js
+module.exports = router;
+const express = require('express');
+const mongoose = require('mongoose');
+const itemsRouter = require('./routes/items');
+const dotenv = require('dotenv');
+dotenv.config();
+const app = express();
+const PORT = process.env.PORT || 3000;
+// Middleware
+app.use(express.json());
+// Database connection
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true,
+useUnifiedTopology: true })
+.then(() => console.log('Database connected'))
+.catch(err => console.error('Database connection error:', err));
+// Routes
+app.use('/api/items', itemsRouter);
+// Start the server
+app.listen(PORT, () => {
+console.log(`Server is running on http://localhost:${PORT}`);
+});
+const request = require('supertest');
+const app = require('../src/index'); // Adjust the path as necessary
+const Item = require('../src/models/item');
+describe('Item Routes', () => {
+beforeAll(async () => {
+// Setup database connection and any necessary seed data
+});
+afterAll(async () => {
+.env
+// Cleanup database and close connection
+});
+it('should create a new item', async () => {
+const newItem = { name: 'Test Item', description: 'This is a test item.'
+};
+const response = await request(app).post('/api/items').send(newItem);
+expect(response.status).toBe(201);
+expect(response.body).toHaveProperty('id');
+expect(response.body.name).toBe(newItem.name);
+});
+it('should retrieve all items', async () => {
+const response = await request(app).get('/api/items');
+expect(response.status).toBe(200);
+expect(Array.isArray(response.body)).toBe(true);
+});
+it('should retrieve a single item by ID', async () => {
+const itemId = 1; // Replace with a valid ID from your test data
+const response = await request(app).get(`/api/items/${itemId}`);
+expect(response.status).toBe(200);
+expect(response.body).toHaveProperty('id', itemId);
+});
+it('should update an item', async () => {
+const itemId = 1; // Replace with a valid ID from your test data
+const updatedItem = { name: 'Updated Item', description: 'This is an
+updated test item.' };
+const response = await
+request(app).put(`/api/items/${itemId}`).send(updatedItem);
+expect(response.status).toBe(200);
+expect(response.body.name).toBe(updatedItem.name);
+});
+it('should delete an item', async () => {
+const itemId = 1; // Replace with a valid ID from your test data
+const response = await request(app).delete(`/api/items/${itemId}`);
+expect(response.status).toBe(204);
+});
+});
+DATABASE_URL=your_database_connection_string
+PORT=3000
+SECRET_KEY=your_secret_key
+Package.json
+API Documentation: User Authentication System
+Base URL
+http://localhost:5000/api
+Or for deployed app:
+https://user-auth-system.vercel.app/api
+{
+"name": "frontend-sample-backend",
+"version": "1.0.0",
+"description": "Backend for the Frontend Sample application",
+"main": "src/index.js",
+"scripts": {
+"start": "node src/index.js",
+"test": "jest"
+},
+"dependencies": {
+"express": "^4.17.1",
+"mongoose": "^5.10.9",
+"dotenv": "^8.2.0"
+},
+"devDependencies": {
+"jest": "^26.6.0",
+"supertest": "^6.1.0"
+},
+"engines": {
+"node": ">=12.0.0"
+},
+"license": "MIT"
+}
